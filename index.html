@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>卓ログ置き場</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600&family=Noto+Sans+JP:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #111318;
+    --border: #2a2d38;
+    --text: #d4cfc8;
+    --text-dim: #6b6870;
+    --accent: #8e9dc4;
+    --accent-hover: #b3bfdd;
+    --tag-bg: #1e2130;
+    --tag-hover: #2a3050;
+    --campaign-head: #c9b99a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    padding: 0 0 80px;
+  }
+  header {
+    padding: 36px 32px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+  }
+  header h1 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--campaign-head);
+    letter-spacing: .05em;
+  }
+  header span {
+    font-size: .75rem;
+    color: var(--text-dim);
+    letter-spacing: .08em;
+  }
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  .campaign { margin-top: 40px; }
+  .campaign-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    padding: 10px 0 10px 4px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 4px;
+  }
+  .campaign-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--campaign-head);
+  }
+  .campaign-period {
+    font-size: .72rem;
+    color: var(--text-dim);
+    letter-spacing: .06em;
+  }
+
+  /* ── エピソード行 ── */
+  .episode {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 4px;
+    border-bottom: 1px solid #1e2028;
+    transition: background .15s;
+    flex-wrap: wrap;
+  }
+  .episode:hover { background: #15171e; }
+  .ep-num {
+    font-size: .7rem;
+    color: var(--text-dim);
+    min-width: 38px;
+    padding-top: 2px;
+    flex-shrink: 0;
+  }
+  .ep-main {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex: 1;
+    min-width: 160px;
+  }
+  .ep-title a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: .88rem;
+    transition: color .15s;
+    line-height: 1.5;
+  }
+  .ep-title a:hover {
+    color: var(--accent-hover);
+    text-decoration: underline;
+  }
+  .ep-date {
+    font-size: .68rem;
+    color: var(--text-dim);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .ep-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: flex-end;
+  }
+  .tag {
+    font-size: .63rem;
+    padding: 2px 7px;
+    border-radius: 2px;
+    background: var(--tag-bg);
+    color: var(--text-dim);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    transition: background .15s, color .15s;
+    letter-spacing: .03em;
+    white-space: nowrap;
+  }
+  .tag:hover {
+    background: var(--tag-hover);
+    color: var(--accent-hover);
+  }
+  .tag.none {
+    opacity: .2;
+    pointer-events: none;
+    cursor: default;
+  }
+
+  /* ── 花夢ロック画面 ── */
+  .lock-area {
+    padding: 28px 4px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .lock-btn {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: .78rem;
+    padding: 6px 18px;
+    background: transparent;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    cursor: pointer;
+    letter-spacing: .06em;
+    transition: background .15s, color .15s;
+  }
+  .lock-btn:hover {
+    background: var(--tag-hover);
+    color: var(--accent-hover);
+  }
+  .lock-note {
+    font-size: .72rem;
+    color: var(--text-dim);
+  }
+
+  @media (max-width: 640px) {
+    header { padding: 24px 16px 18px; }
+    .campaign { margin-top: 28px; }
+    .ep-date { display: none; }
+    .tag { padding: 2px 5px; font-size: .6rem; }
+  }
+</style>
+<script>
+  function unlockHanamu() {
+    var pw = prompt('花夢キャンペーン：パスワードを入力してください');
+    if (pw === 'wannabegray58') {
+      sessionStorage.setItem('hanamu_auth', '1');
+      document.getElementById('hanamu-locked').style.display = 'none';
+      document.getElementById('hanamu-content').style.display = 'block';
+    } else if (pw !== null) {
+      alert('パスワードが違います');
+    }
+  }
+  window.addEventListener('DOMContentLoaded', function () {
+    if (sessionStorage.getItem('hanamu_auth') === '1') {
+      document.getElementById('hanamu-locked').style.display = 'none';
+      document.getElementById('hanamu-content').style.display = 'block';
+    }
+  });
+</script>
+</head>
+<body>
+
+<header>
+  <h1>卓ログ置き場</h1>
+  <span>personal archive</span>
+</header>
+
+<div class="container">
+
+<!-- ============================================================
+     花夢キャンペ
+     開催期間: 2025/10/17 – 2025/12/17
+     ※ ep-date は開催日（ファイル名の日付と1日ズレる場合あり）
+     ※ 各日付は適宜修正してください
+============================================================ -->
+<section class="campaign">
+  <div class="campaign-header">
+    <span class="campaign-title">花夢キャンペ</span>
+    <span class="campaign-period">2025.10.17 – 2025.12.17</span>
+  </div>
+
+  <!-- ロック表示 -->
+  <div id="hanamu-locked">
+    <div class="lock-area">
+      <button class="lock-btn" onclick="unlockHanamu()">🔒 パスワードを入力</button>
+      <span class="lock-note">このキャンペーンはパスワード保護されています</span>
+    </div>
+  </div>
+
+  <!-- ログ一覧（認証後に表示） -->
+  <div id="hanamu-content" style="display:none">
+
+    <!-- 第一話 -->
+    <div class="episode">
+      <span class="ep-num">第1話</span>
+      <div class="ep-main">
+        <span class="ep-title"><a href="logs/20251018_花夢キャンペ_メイン.html">誰が花を導くか／Who Leads the Flowers</a></span>
+        <span class="ep-date">2025.10.17</span>
+      </div>
+      <div class="ep-tags">
+        <a class="tag" href="logs/20251018_花夢キャンペ_サブ.html">サブ</a>
+        <a class="tag" href="logs/20251018_花夢キャンペ_雑談.html">雑談</a>
+        <a class="tag" href="logs/20251018_花夢キャンペ_ダイス.html">ダイス</a>
+        <span class="tag none">アフター</span>
+        <a class="tag" href="logs/20251018_花夢キャンペ_tips.html">tips</a>
+        <span class="tag none">BGM用</span>
+        <span class="tag none">メモ</span>
+        <span class="tag none">秘話用</span>
+      </div>
+    </div>
+
+    <!-- 第二話 -->
+    <div class="episode">
+      <span class="ep-num">第2話</span>
+      <div class="ep-main">
+        <span class="ep-title"><a href="logs/20251025_花夢キャンペ_メイン.html">祈りの果てに燃ゆ／Where Prayers Burn to Ashes</a></span>
+        <span class="ep-date">2025.10.25</span>
+      </div>
+      <div class="ep-tags">
+        <span class="tag none">サブ</span>
+        <span class="tag none">雑談</span>
+        <span class="tag none">ダイス</span>
+        <span class="tag none">アフター</span>
+        <span class="tag none">tips</span>
+        <span class="tag none">BGM用</span>
+        <span class="tag none">メモ</span>
+        <span class="tag none">秘話用</span>
+      </div>
+    </div>
+
+    <!-- 第三話 -->
+    <div class="episode">
+      <span class="ep-num">第3話</span>
+      <div class="ep-main">
+        <span class="ep-title"><a href="logs/20251108_花夢キャンペ_メイン.html">燃え咲く花／The Burning Bloom</a></span>
+        <span class="ep-date">2025.11.08</span>
+      </div>
+      <div class="ep-tags">
+        <a class="tag" href="logs/20251108_花夢キャンペ_サブ.html">サブ</a>
+        <a class="tag" href="logs/20251108_花夢キャンペ_雑談.html">雑談</a>
+        <a class="tag" href="logs/20251108_花夢キャンペ_ダイス.html">ダイス</a>
+        <span class="tag none">アフター</span>
+        <a class="tag" href="logs/20251108_花夢キャンペ_tips.html">tips</a>
+        <span class="tag none">BGM用</span>
+        <span class="tag none">メモ</span>
+        <a class="tag" href="logs/20251108_花夢キャンペ_秘話用.html">秘話用</a>
+      </div>
+    </div>
+
+    <!-- 第四話 -->
+    <div class="episode">
+      <span class="ep-num">第4話</span>
+      <div class="ep-main">
+        <span class="ep-title"><a href="logs/20251113_花夢キャンペ_メイン.html">焔のぼりて／Flame Ascends</a></span>
+        <span class="ep-date">2025.11.13</span>
+      </div>
+      <div class="ep-tags">
+        <a class="tag" href="logs/20251113_花夢キャンペ_サブ.html">サブ</a>
+        <a class="tag" href="logs/20251113_花夢キャンペ_雑談.html">雑談</a>
+        <a class="tag" href="logs/20251113_花夢キャンペ_ダイス.html">ダイス</a>
+        <span class="tag none">アフター</span>
+        <a class="tag" href="logs/20251113_花夢キャンペ_tips.html">tips</a>
+        <a class="tag" href="logs/20251113_花夢キャンペ_BGM用.html">BGM用</a>
+        <a class="tag" href="logs/20251113_花夢キャンペ_メモ.html">メモ</a>
+        <span class="tag none">秘話用</span>
+      </div>
+    </div>
+
+    <!-- 第五話 -->
+    <div class="episode">
+      <span class="ep-num">第5話</span>
+      <div class="ep-main">
+        <span class="ep-title"><a href="logs/20251127_花夢キャンペ_メイン.html">病と呪いの境界にて／Where Illness Meets the Curse</a></span>
+        <span class="ep-date">2025.11.27</span>
+      </div>
+      <div class="ep-tags">
+        <a class="tag" href="logs/20251127_花夢キャンペ_サブ.html">サブ</a>
+        <a class="tag" href="logs/20251127_花夢キャンペ_雑談.html">雑談</a>
+        <a class="tag" href="logs/20251127_花夢キャンペ_ダイス.html">ダイス</a>
+        <span class="tag none">アフター</span>
+        <a class="tag" href="logs/20251127_花夢キャンペ_tips.html">tips</a>
+        <a class="tag" href="logs/20251127_花夢キャンペ_BGM用.html">BGM用</a>
+        <a class="tag" href="logs/20251127_花夢キャンペ_メモ.html">メモ</a>
+        <a class="tag" href="logs/20251127_花夢キャンペ_秘話用.html">秘話用</a>
+      </div>
+    </div>
+
+    <!-- 第六話 -->
+    <div class="episode">
+      <span class="ep-num">第6話</span>
+      <div class="ep-main">
+        <span class="ep-title"><a href="logs/20251129_花夢キャンペ_メイン.html">消えた足跡を追って／Following Faded Footsteps</a></span>
+        <span class="ep-date">2025.11.29</span>
+      </div>
+      <div class="ep-tags">
+        <a class="tag" href="logs/20251129_花夢キャンペ_サブ.html">サブ</a>
+        <a class="tag" href="logs/20251129_花夢キャンペ_雑談.html">雑談</a>
+        <a class="tag" href="logs/20251129_花夢キャンペ_ダイス.html">ダイス</a>
+        <span class="tag none">アフター</span>
+        <a class="tag" href="logs/20251129_花夢キャンペ_tips.html">tips</a>
+        <a class="tag" href="logs/20251129_花夢キャンペ_BGM用.html">BGM用</a>
+        <a class="tag" href="logs/20251129_花夢キャンペ_メモ.html">メモ</a>
+        <a class="tag" href="logs/20251129_花夢キャンペ_秘話用.html">秘話用</a>
+      </div>
+    </div>
+
+    <!-- 第七話 -->
+    <div class="episode">
+      <span class="ep-num">第7話</span>
+      <div class="ep-main">
+        <span class="ep-title"><a href="logs/20251218_花夢キャンペ_メイン.html">祈りが泥に沈む前に／Before the Prayer Sinks into the Mud</a></span>
+        <span class="ep-date">2025.12.18</span>
+      </div>
+      <div class="ep-tags">
+        <a class="tag" href="logs/20251218_花夢キャンペ_サブ.html">サブ</a>
+        <a class="tag" href="logs/20251218_花夢キャンペ_雑談.html">雑談</a>
+        <a class="tag" href="logs/20251218_花夢キャンペ_ダイス.html">ダイス</a>
+        <span class="tag none">アフター</span>
+        <a class="tag" href="logs/20251218_花夢キャンペ_tips.html">tips</a>
+        <a class="tag" href="logs/20251218_花夢キャンペ_BGM用.html">BGM用</a>
+        <a class="tag" href="logs/20251218_花夢キャンペ_メモ.html">メモ</a>
+        <a class="tag" href="logs/20251218_花夢キャンペ_秘話用.html">秘話用</a>
+      </div>
+    </div>
+
+  </div><!-- /hanamu-content -->
+</section>
+
+
+<!-- ============================================================
+     セイガクキャンペーン
+     開催期間: 2026/02/13 – 2026/03/29
+     ※ ep-date は開催日（ファイル名の日付と1日ズレる場合あり）
+     ※ 各日付は適宜修正してください
+============================================================ -->
+<section class="campaign">
+  <div class="campaign-header">
+    <span class="campaign-title">セイガクキャンペーン</span>
+    <span class="campaign-period">2026.02.13 – 2026.03.29</span>
+  </div>
+
+  <!-- 第一話 -->
+  <div class="episode">
+    <span class="ep-num">第1話</span>
+    <div class="ep-main">
+      <span class="ep-title"><a href="logs/20260214_セイガクキャンペーン_メイン.html">鬼さんこちら</a></span>
+      <span class="ep-date">2026.02.13</span>
+    </div>
+    <div class="ep-tags">
+      <a class="tag" href="logs/20260214_セイガクキャンペーン_サブ.html">サブ</a>
+      <a class="tag" href="logs/20260214_セイガクキャンペーン_雑談.html">雑談</a>
+      <a class="tag" href="logs/20260214_セイガクキャンペーン_ダイス.html">ダイス</a>
+      <span class="tag none">アフター</span>
+      <a class="tag" href="logs/20260214_セイガクキャンペーン_TIPS.html">TIPS</a>
+      <a class="tag" href="logs/20260214_セイガクキャンペーン_GM用.html">GM用</a>
+      <a class="tag" href="logs/20260214_セイガクキャンペーン_質問・解説.html">質問・解説</a>
+      <span class="tag none">全タブ</span>
+      <span class="tag none">全タブv2</span>
+      <span class="tag none">見学用</span>
+    </div>
+  </div>
+
+  <!-- 第二話 -->
+  <div class="episode">
+    <span class="ep-num">第2話</span>
+    <div class="ep-main">
+      <span class="ep-title"><a href="logs/20260228_セイガクキャンペーン_メイン.html">幽し異物、昏き残響</a></span>
+      <span class="ep-date">2026.02.28</span>
+    </div>
+    <div class="ep-tags">
+      <a class="tag" href="logs/20260228_セイガクキャンペーン_サブ.html">サブ</a>
+      <a class="tag" href="logs/20260228_セイガクキャンペーン_雑談.html">雑談</a>
+      <a class="tag" href="logs/20260228_セイガクキャンペーン_ダイス.html">ダイス</a>
+      <a class="tag" href="logs/20260228_セイガクキャンペーン_アフター.html">アフター</a>
+      <a class="tag" href="logs/20260228_セイガクキャンペーン_TIPS.html">TIPS</a>
+      <a class="tag" href="logs/20260228_セイガクキャンペーン_GM用.html">GM用</a>
+      <a class="tag" href="logs/20260228_セイガクキャンペーン_質問・解説.html">質問・解説</a>
+      <a class="tag" href="logs/20260228_セイガクキャンペーン_全タブ.html">全タブ</a>
+      <a class="tag" href="logs/20260228_セイガクキャンペーン_全タブv2.html">全タブv2</a>
+      <span class="tag none">見学用</span>
+    </div>
+  </div>
+
+  <!-- 第三話 -->
+  <div class="episode">
+    <span class="ep-num">第3話</span>
+    <div class="ep-main">
+      <span class="ep-title"><a href="logs/20260309_セイガクキャンペーン_メイン.html">鬼の宴は終わらない</a></span>
+      <span class="ep-date">2026.03.09</span>
+    </div>
+    <div class="ep-tags">
+      <a class="tag" href="logs/20260309_セイガクキャンペーン_サブ.html">サブ</a>
+      <a class="tag" href="logs/20260309_セイガクキャンペーン_雑談.html">雑談</a>
+      <a class="tag" href="logs/20260309_セイガクキャンペーン_ダイス.html">ダイス</a>
+      <a class="tag" href="logs/20260309_セイガクキャンペーン_アフター.html">アフター</a>
+      <a class="tag" href="logs/20260309_セイガクキャンペーン_TIPS.html">TIPS</a>
+      <span class="tag none">GM用</span>
+      <span class="tag none">質問・解説</span>
+      <a class="tag" href="logs/20260309_セイガクキャンペーン_全タブ.html">全タブ</a>
+      <a class="tag" href="logs/20260309_セイガクキャンペーン_全タブv2.html">全タブv2</a>
+      <span class="tag none">見学用</span>
+    </div>
+  </div>
+
+  <!-- 第四話 -->
+  <div class="episode">
+    <span class="ep-num">第4話</span>
+    <div class="ep-main">
+      <span class="ep-title"><a href="logs/20260318_セイガクキャンペーン_メイン.html">凪、桜散らず</a></span>
+      <span class="ep-date">2026.03.18</span>
+    </div>
+    <div class="ep-tags">
+      <a class="tag" href="logs/20260318_セイガクキャンペーン_サブ.html">サブ</a>
+      <a class="tag" href="logs/20260318_セイガクキャンペーン_雑談.html">雑談</a>
+      <a class="tag" href="logs/20260318_セイガクキャンペーン_ダイス.html">ダイス</a>
+      <a class="tag" href="logs/20260318_セイガクキャンペーン_アフター.html">アフター</a>
+      <a class="tag" href="logs/20260318_セイガクキャンペーン_TIPS.html">TIPS</a>
+      <a class="tag" href="logs/20260318_セイガクキャンペーン_GM用.html">GM用</a>
+      <a class="tag" href="logs/20260318_セイガクキャンペーン_質問・解説.html">質問・解説</a>
+      <a class="tag" href="logs/20260318_セイガクキャンペーン_全タブ.html">全タブ</a>
+      <a class="tag" href="logs/20260318_セイガクキャンペーン_全タブv2.html">全タブv2</a>
+      <a class="tag" href="logs/20260318_セイガクキャンペーン_見学用.html">見学用</a>
+    </div>
+  </div>
+
+  <!-- 第五話 -->
+  <div class="episode">
+    <span class="ep-num">第5話</span>
+    <div class="ep-main">
+      <span class="ep-title"><a href="logs/20260330_セイガクキャンペーン_メイン.html">凪の果て、花散らし</a></span>
+      <span class="ep-date">2026.03.29</span>
+    </div>
+    <div class="ep-tags">
+      <a class="tag" href="logs/20260330_セイガクキャンペーン_サブ.html">サブ</a>
+      <a class="tag" href="logs/20260330_セイガクキャンペーン_雑談.html">雑談</a>
+      <a class="tag" href="logs/20260330_セイガクキャンペーン_ダイス.html">ダイス</a>
+      <a class="tag" href="logs/20260330_セイガクキャンペーン_アフター.html">アフター</a>
+      <a class="tag" href="logs/20260330_セイガクキャンペーン_TIPS.html">TIPS</a>
+      <a class="tag" href="logs/20260330_セイガクキャンペーン_GM用.html">GM用</a>
+      <a class="tag" href="logs/20260330_セイガクキャンペーン_質問・解説.html">質問・解説</a>
+      <a class="tag" href="logs/20260330_セイガクキャンペーン_全タブ.html">全タブ</a>
+      <a class="tag" href="logs/20260330_セイガクキャンペーン_全タブv2.html">全タブv2</a>
+      <a class="tag" href="logs/20260330_セイガクキャンペーン_見学用.html">見学用</a>
+    </div>
+  </div>
+
+</section>
+
+</div><!-- /container -->
+</body>
+</html>
