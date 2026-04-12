@@ -183,11 +183,11 @@
     }
   });
 function unlockNewcamp() {
-  var pw = prompt('パスワードを入力してください');
+  var pw = prompt('罪人キャンペーン：パスワードを入力してください');
   if (pw === 'wannabegray58') {
-    sessionStorage.setItem('sinner_auth', '1');
-    document.getElementById('sinner-locked').style.display = 'none';
-    document.getElementById('sinner-content').style.display = 'block';
+    sessionStorage.setItem('newcamp_auth', '1');
+    document.getElementById('newcamp-locked').style.display = 'none';
+    document.getElementById('newcamp-content').style.display = 'block';
   } else if (pw !== null) {
     alert('パスワードが違います');
   }
