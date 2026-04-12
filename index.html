@@ -182,6 +182,23 @@
       document.getElementById('hanamu-content').style.display = 'block';
     }
   });
+function unlockNewcamp() {
+  var pw = prompt('パスワードを入力してください');
+  if (pw === 'wannabegray58') {
+    sessionStorage.setItem('sinner_auth', '1');
+    document.getElementById('sinner-locked').style.display = 'none';
+    document.getElementById('sinner-content').style.display = 'block';
+  } else if (pw !== null) {
+    alert('パスワードが違います');
+  }
+}
+window.addEventListener('DOMContentLoaded', function () {
+  if (sessionStorage.getItem('newcamp_auth') === '1') {
+    document.getElementById('newcamp-locked').style.display = 'none';
+    document.getElementById('newcamp-content').style.display = 'block';
+  }
+});
+  
 </script>
 </head>
 <body>
@@ -367,7 +384,34 @@
   </div>
 
 </section>
+<section class="campaign">
+  <div class="campaign-header">
+    <span class="campaign-title">罪人キャンペ</span>
+    <span class="campaign-period">2026.04.10 – 進行中</span>
+  </div>
 
+  <div id="newcamp-locked">
+    <div class="lock-area">
+      <button class="lock-btn" onclick="unlockNewcamp()">🔒 パスワードを入力</button>
+      <span class="lock-note">このキャンペーンはパスワード保護されています</span>
+    </div>
+  </div>
+
+  <div id="newcamp-content" style="display:none">
+
+    <div class="episode">
+      <span class="ep-num">第1話</span>
+      <div class="ep-main">
+        <span class="ep-title"><a href="logs/YYYYMMDD_キャンペーン名_メイン.html">話タイトル</a></span>
+        <span class="ep-date">2026.xx.xx</span>
+      </div>
+      <div class="ep-tags">
+        <a class="tag" href="logs/YYYYMMDD_罪人キャンペ_サブ.html">サブ</a>
+      </div>
+    </div>
+
+  </div>
+</section>
 </div><!-- /container -->
 </body>
 </html>
