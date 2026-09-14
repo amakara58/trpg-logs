@@ -178,9 +178,9 @@ table.tbl td.num{font-family:'JetBrains Mono',monospace;color:var(--text)}
   <div id="tab-data" style="display:none">
     <div class="sec">
       <div class="sec-title">みんなに公開する</div>
-      <p class="info" style="margin-bottom:12px">記録を更新したら、下のボタンで <b>data.json</b> を書き出して、サイトと同じフォルダにアップロードし直す。これでリンクを開いた全員が最新の記録を見られる。</p>
+      <p class="info" style="margin-bottom:12px">記録を更新したら、下のボタンで <b>mdmslogdata.json</b> を書き出して、サイトと同じフォルダにアップロードし直す。これでリンクを開いた全員が最新の記録を見られる。ファイル名が1文字でも違うと読み込めないので注意。</p>
       <div class="row">
-        <button class="btn btn-p" onclick="exportPublic()">公開用 data.json を書き出す</button>
+        <button class="btn btn-p" onclick="exportPublic()">公開用 mdmslogdata.json を書き出す</button>
         <button class="btn btn-s" onclick="reloadPublic()">公開データを読み直す</button>
       </div>
       <p class="info mt8">「読み直す」を押すと、このブラウザで加えた未公開の変更は破棄されて公開データの状態に戻る。</p>
@@ -224,6 +224,7 @@ let saveTm=null;
 // stamp（最終更新時刻）が新しい方を採用する。
 const KEY='madamis_log';
 const BACKUP_KEY='madamis_log_prev';
+const DATA_FILE='mdmslogdata.json';   // ← 公開データのファイル名。変えるならここだけ
 let pubStamp=null;
 
 function normalize(p){
@@ -248,7 +249,7 @@ async function readLocal(){
 }
 async function readPublic(){
   try{
-    const res=await fetch('data.json?t='+Date.now(),{cache:'no-store'});
+    const res=await fetch(DATA_FILE+'?t='+Date.now(),{cache:'no-store'});
     if(!res.ok)return null;
     return normalize(await res.json());
   }catch(e){ return null; }
@@ -295,7 +296,7 @@ function updateStatus(){
 }
 async function reloadPublic(){
   const pub=await readPublic();
-  if(!pub){ alert('data.json が見つからない。GitHubにアップロード済みか、ファイル名が data.json になっているか確認して。'); return; }
+  if(!pub){ alert(DATA_FILE+' が見つからない。GitHubにアップロード済みか、ファイル名が '+DATA_FILE+' になっているか確認して。'); return; }
   if(!confirm('公開データを読み直す。このブラウザで加えた未公開の変更は消える。続ける？'))return;
   const loc=await readLocal();
   if(loc){ try{ localStorage.setItem(BACKUP_KEY,JSON.stringify(loc)); }catch(e){} }
@@ -698,8 +699,8 @@ function exportCSV(){
 }
 function exportPublic(){
   if(!D.stamp) D.stamp=Date.now();
-  dl(JSON.stringify(D,null,2),'data.json','application/json');
-  toast('data.json を書き出した。サイトのフォルダに上書きアップロードして');
+  dl(JSON.stringify(D,null,2),DATA_FILE,'application/json');
+  toast(DATA_FILE+' を書き出した。サイトのフォルダに上書きアップロードして');
 }
 function exportJSON(){
   dl(JSON.stringify(D,null,2),`madamis_log_${new Date().toISOString().slice(0,10)}.json`,'application/json');
