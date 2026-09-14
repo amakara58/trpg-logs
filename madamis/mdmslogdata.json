@@ -1,0 +1,81 @@
+{
+  "members": [
+    {
+      "id": "mu1jzuvmj6x",
+      "name": "さおり"
+    },
+    {
+      "id": "mu1jzuvm0ou",
+      "name": "きすぎ"
+    },
+    {
+      "id": "mu1jzuvmqvf",
+      "name": "こにー"
+    },
+    {
+      "id": "mu1jzuvmwzl",
+      "name": "神谷"
+    },
+    {
+      "id": "mu1jzuvmep8",
+      "name": "ちゃえだ"
+    }
+  ],
+  "plays": [
+    {
+      "id": "mu1k0iprcp9",
+      "title": "猛毒のアイ",
+      "date": "2026-09-14",
+      "venue": "online",
+      "myRole": "GM",
+      "duration": "4h",
+      "entries": {
+        "mu1jzuvm0ou": {
+          "charName": "",
+          "culprit": true,
+          "mission": ""
+        },
+        "mu1jzuvmj6x": {
+          "charName": "",
+          "culprit": false,
+          "mission": ""
+        },
+        "mu1jzuvmqvf": {
+          "charName": "",
+          "culprit": false,
+          "mission": ""
+        },
+        "mu1jzuvmwzl": {
+          "charName": "",
+          "culprit": false,
+          "mission": ""
+        },
+        "mu1jzuvmep8": {
+          "charName": "",
+          "culprit": false,
+          "mission": ""
+        }
+      },
+      "guests": [],
+      "culpritNone": false,
+      "culpritResult": "win",
+      "score": "",
+      "tags": [],
+      "note": ""
+    }
+  ],
+  "presets": [
+    "推理重視",
+    "RP重視",
+    "感情系",
+    "ストーリー重視",
+    "ギミック多め",
+    "全員初心者OK",
+    "高難度",
+    "短時間",
+    "長時間",
+    "オープン型",
+    "クローズ型"
+  ],
+  "stamp": 1789409184793
+}
