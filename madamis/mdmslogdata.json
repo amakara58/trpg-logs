@@ -31,27 +31,27 @@
       "duration": "4h",
       "entries": {
         "mu1jzuvm0ou": {
-          "charName": "",
+          "charName": "七瀬 朝陽／PC1",
           "culprit": true,
           "mission": ""
         },
         "mu1jzuvmj6x": {
-          "charName": "",
+          "charName": "山岸 紗霧／PC2",
           "culprit": false,
           "mission": ""
         },
         "mu1jzuvmqvf": {
-          "charName": "",
+          "charName": "野薔薇 りりす／PC5",
           "culprit": false,
           "mission": ""
         },
         "mu1jzuvmwzl": {
-          "charName": "",
+          "charName": "滝村 隼人／PC3",
           "culprit": false,
           "mission": ""
         },
         "mu1jzuvmep8": {
-          "charName": "",
+          "charName": "赤萩 裕也／PC4",
           "culprit": false,
           "mission": ""
         }
@@ -60,7 +60,9 @@
       "culpritNone": false,
       "culpritResult": "win",
       "score": "",
-      "tags": [],
+      "tags": [
+        "高難度"
+      ],
       "note": ""
     }
   ],
@@ -77,5 +79,5 @@
     "オープン型",
     "クローズ型"
   ],
-  "stamp": 1789409184793
+  "stamp": 1789409430460
 }
