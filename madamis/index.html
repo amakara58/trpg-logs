@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MADAMIS LOG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0b13; --surface:#111120; --surface2:#17172a; --surface3:#1e1e35;
+  --border:#272745; --border-lt:#353560;
+  --red:#b03030; --red-h:#cc3838; --gold:#c8920a; --gold-lt:#e8b030;
+  --text:#dcdae0; --text-m:#7878a0; --text-d:#404068;
+  --green:#2d8a55; --radius:4px; --radius-lg:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Noto Serif JP','Yu Mincho',YuMincho,serif;min-height:100vh;font-size:13px;line-height:1.65}
+
+.hdr{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 18px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:100;flex-wrap:wrap}
+.hdr-title{font-family:'Cinzel',serif;font-size:17px;color:var(--gold);letter-spacing:3px;font-weight:700;white-space:nowrap}
+.hdr-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-d);letter-spacing:1px;margin-left:6px}
+.hdr-spacer{flex:1}
+
+select,input,textarea{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:var(--radius);padding:6px 10px;font-family:inherit;font-size:13px;outline:none;transition:border-color .15s}
+select:focus,input:focus,textarea:focus{border-color:var(--red)}
+select{cursor:pointer}
+textarea{resize:vertical;min-height:70px;width:100%}
+input[type=checkbox]{accent-color:var(--red);width:14px;height:14px;flex-shrink:0;cursor:pointer}
+
+.btn{padding:6px 13px;border-radius:var(--radius);border:none;cursor:pointer;font-size:12px;font-family:inherit;transition:all .15s;white-space:nowrap}
+.btn-p{background:var(--red);color:#fff}.btn-p:hover{background:var(--red-h)}
+.btn-s{background:var(--surface3);color:var(--text);border:1px solid var(--border)}.btn-s:hover{border-color:var(--border-lt)}
+.btn-g{background:transparent;color:var(--text-m);border:1px solid transparent}.btn-g:hover{color:var(--text);border-color:var(--border)}
+.btn-sm{padding:3px 9px;font-size:11px}
+
+.main{max-width:1060px;margin:0 auto;padding:22px 18px 60px}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:22px;flex-wrap:wrap}
+.tab{padding:8px 15px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--text-m);cursor:pointer;font-size:12px;font-family:inherit;transition:all .2s;margin-bottom:-1px}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--gold-lt);border-bottom-color:var(--gold-lt)}
+
+.sec{margin-bottom:24px}
+.sec-title{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text-m);margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid var(--border)}
+hr.div{border:none;border-top:1px solid var(--border);margin:18px 0}
+.info{font-size:11px;color:var(--text-m);font-style:italic}
+.mt8{margin-top:8px}.mt12{margin-top:12px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.f1{flex:1}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.fgrp{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fgrp.s2{grid-column:span 2}
+.flabel{font-size:10px;color:var(--text-m);letter-spacing:.5px}
+
+/* ── Play cards ── */
+.play-list{display:flex;flex-direction:column;gap:7px}
+.play-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+.play-hdr{display:flex;align-items:center;gap:11px;padding:11px 14px;cursor:pointer;transition:background .15s;user-select:none}
+.play-hdr:hover{background:var(--surface3)}
+.play-date{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-m);min-width:82px}
+.play-name{flex:1;font-size:14px;min-width:120px}
+.play-score{font-family:'JetBrains Mono',monospace;font-size:13px;min-width:34px;text-align:right}
+.play-body{padding:14px;border-top:1px solid var(--border);display:none}
+.play-body.open{display:block}
+.role-badge{font-family:'JetBrains Mono',monospace;font-size:9px;padding:1px 6px;border-radius:2px;border:1px solid var(--border-lt);color:var(--text-m)}
+
+/* ── Participants ── */
+.pt-head,.pt-row{display:grid;grid-template-columns:22px 108px 1fr 52px 1fr;gap:7px;align-items:center}
+.pt-head{font-size:10px;color:var(--text-d);letter-spacing:.5px;padding:0 4px 4px}
+.pt-row{background:var(--surface3);border:1px solid var(--border);border-radius:var(--radius);padding:5px 4px;margin-bottom:4px}
+.pt-row.off{opacity:.4}
+.pt-name{font-size:12px;padding-left:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pt-row input[type=text]{padding:4px 7px;font-size:12px;min-width:0;width:100%}
+.pt-cul{display:flex;justify-content:center}
+.pt-row.culprit{border-color:var(--red);background:rgba(176,48,48,.12)}
+
+/* ── Tags ── */
+.tag-wrap{display:flex;flex-wrap:wrap;gap:5px}
+.tag{padding:3px 10px;border-radius:12px;border:1px solid var(--border);background:var(--surface3);color:var(--text-m);font-size:11px;cursor:pointer;transition:all .15s}
+.tag:hover{border-color:var(--border-lt);color:var(--text)}
+.tag.on{background:rgba(200,146,10,.15);border-color:var(--gold);color:var(--gold-lt)}
+.tag-static{padding:1px 8px;border-radius:10px;font-size:10px;background:var(--surface3);border:1px solid var(--border);color:var(--text-m);cursor:default}
+
+/* ── Stats ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px}
+.stat-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:11px 13px}
+.stat-lbl{font-size:10px;color:var(--text-m);letter-spacing:1px}
+.stat-val{font-family:'JetBrains Mono',monospace;font-size:20px;color:var(--gold);margin:3px 0 2px}
+.stat-sub{font-size:11px;color:var(--text-m)}
+table.tbl{width:100%;border-collapse:collapse;font-size:12px}
+table.tbl th{font-size:10px;color:var(--text-m);text-align:left;font-weight:normal;padding:5px 8px;border-bottom:1px solid var(--border);letter-spacing:.5px}
+table.tbl td{padding:6px 8px;border-bottom:1px solid var(--border)}
+table.tbl td.num{font-family:'JetBrains Mono',monospace;color:var(--text)}
+.bar-track{height:5px;background:var(--surface3);border-radius:3px;overflow:hidden;min-width:60px}
+.bar-fill{height:100%;background:var(--red);border-radius:3px}
+
+/* ── Members ── */
+.mem-row{display:flex;gap:8px;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:6px 10px;margin-bottom:5px}
+.mem-idx{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-d);width:18px}
+
+.status{display:flex;align-items:center;gap:8px;font-size:11px}
+.st{padding:1px 8px;border-radius:2px;font-family:'JetBrains Mono',monospace;font-size:10px}
+.st-pub{background:rgba(45,138,85,.18);color:#2ecc71;border:1px solid rgba(45,138,85,.35)}
+.st-ahead{background:rgba(200,146,10,.15);color:var(--gold-lt);border:1px solid rgba(200,146,10,.35)}
+.st-local{background:var(--surface3);color:var(--text-m);border:1px solid var(--border)}
+.st-time{color:var(--text-d);font-family:'JetBrains Mono',monospace;font-size:10px}
+
+.empty{text-align:center;padding:60px 20px;color:var(--text-m)}
+.empty h2{font-family:'Cinzel',serif;color:var(--text-d);margin-bottom:12px;font-size:20px}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--surface3);border:1px solid var(--border-lt);color:var(--text);padding:8px 18px;border-radius:var(--radius);font-size:12px;opacity:0;pointer-events:none;transition:opacity .25s;z-index:300}
+.toast.show{opacity:1}
+
+@media(max-width:700px){
+  .fg{grid-template-columns:1fr}
+  .fgrp.s2{grid-column:span 1}
+  .pt-head{display:none}
+  .pt-row{grid-template-columns:22px 1fr;grid-auto-rows:auto;row-gap:5px}
+  .pt-row .pt-cul{grid-column:1;justify-content:flex-start;padding-left:4px}
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <span class="hdr-title">MADAMIS LOG<span class="hdr-sub"> PLAY ARCHIVE</span></span>
+  <span id="status" class="status"></span>
+  <div class="hdr-spacer"></div>
+  <button class="btn btn-p" onclick="addPlay()">＋ 記録を追加</button>
+</div>
+
+<div class="main">
+  <div class="tabs">
+    <button class="tab active" onclick="swTab('plays',this)">プレイ記録</button>
+    <button class="tab" onclick="swTab('stats',this)">集計</button>
+    <button class="tab" onclick="swTab('members',this)">メンバー</button>
+    <button class="tab" onclick="swTab('data',this)">データ</button>
+  </div>
+
+  <!-- プレイ記録 -->
+  <div id="tab-plays">
+    <div class="row" style="margin-bottom:12px">
+      <input id="qText" placeholder="シナリオ名・雑感で検索" style="flex:1;min-width:160px" oninput="renderPlays()">
+      <select id="qTag" onchange="renderPlays()"><option value="">タグ全部</option></select>
+      <select id="qSort" onchange="renderPlays()">
+        <option value="date-desc">日付が新しい順</option>
+        <option value="date-asc">日付が古い順</option>
+        <option value="score-desc">評価が高い順</option>
+        <option value="score-asc">評価が低い順</option>
+      </select>
+    </div>
+    <div class="play-list" id="playList"></div>
+  </div>
+
+  <!-- 集計 -->
+  <div id="tab-stats" style="display:none"></div>
+
+  <!-- メンバー -->
+  <div id="tab-members" style="display:none">
+    <div class="sec">
+      <div class="sec-title">固定メンバー</div>
+      <p class="info" style="margin-bottom:10px">ここに登録した人が各記録のチェック欄に並ぶ。人数は5人固定じゃなくてOK。単発のゲストは記録側で個別に追加できる。</p>
+      <div id="memList"></div>
+      <button class="btn btn-s btn-sm mt8" onclick="addMember()">＋ メンバー追加</button>
+    </div>
+    <hr class="div">
+    <div class="sec">
+      <div class="sec-title">タグのプリセット</div>
+      <p class="info" style="margin-bottom:10px">記録画面でワンタップ選択できるタグ。過去の記録で使ったタグは自動で候補に入る。</p>
+      <div class="tag-wrap" id="presetList"></div>
+      <div class="row mt8">
+        <input id="newPreset" placeholder="タグ名" style="width:180px" onkeydown="if(event.key==='Enter')addPreset()">
+        <button class="btn btn-s btn-sm" onclick="addPreset()">追加</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- データ -->
+  <div id="tab-data" style="display:none">
+    <div class="sec">
+      <div class="sec-title">みんなに公開する</div>
+      <p class="info" style="margin-bottom:12px">記録を更新したら、下のボタンで <b>data.json</b> を書き出して、サイトと同じフォルダにアップロードし直す。これでリンクを開いた全員が最新の記録を見られる。</p>
+      <div class="row">
+        <button class="btn btn-p" onclick="exportPublic()">公開用 data.json を書き出す</button>
+        <button class="btn btn-s" onclick="reloadPublic()">公開データを読み直す</button>
+      </div>
+      <p class="info mt8">「読み直す」を押すと、このブラウザで加えた未公開の変更は破棄されて公開データの状態に戻る。</p>
+    </div>
+    <hr class="div">
+    <div class="sec">
+      <div class="sec-title">書き出し</div>
+      <p class="info" style="margin-bottom:12px">CSVは記録1行＝1プレイ。Excel/スプレッドシートでそのまま開ける（BOM付きUTF-8）。JSONは復元用の完全バックアップ。</p>
+      <div class="row">
+        <button class="btn btn-p" onclick="exportCSV()">プレイ記録をCSVで保存</button>
+        <button class="btn btn-s" onclick="exportJSON()">全データをJSONで保存</button>
+      </div>
+    </div>
+    <hr class="div">
+    <div class="sec">
+      <div class="sec-title">読み込み</div>
+      <p class="info" style="margin-bottom:10px">JSONを読み込むと現在のデータを上書きする。先に書き出しておくこと。</p>
+      <div class="row">
+        <input type="file" id="importFile" accept=".json" style="flex:1;min-width:180px">
+        <button class="btn btn-s" onclick="importJSON()">読み込む</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── 定数 ──
+const DAYS=['日','月','火','水','木','金','土'];
+const DEFAULT_PRESETS=['推理重視','RP重視','感情系','ストーリー重視','ギミック多め','全員初心者OK','高難度','短時間','長時間','オープン型','クローズ型'];
+
+// ── State ──
+let D={members:[],plays:[],presets:DEFAULT_PRESETS.slice(),stamp:0};
+let openIds=new Set();
+let saveTm=null;
+
+// ── Storage ──
+// 二層構造。同じフォルダの data.json が「みんなが見る公開データ」、
+// localStorage が「このブラウザの作業中データ」。
+// stamp（最終更新時刻）が新しい方を採用する。
+const KEY='madamis_log';
+const BACKUP_KEY='madamis_log_prev';
+let pubStamp=null;
+
+function normalize(p){
+  return {
+    members:p.members||[],
+    plays:p.plays||[],
+    presets:(p.presets&&p.presets.length)?p.presets:DEFAULT_PRESETS.slice(),
+    stamp:p.stamp||0
+  };
+}
+async function readLocal(){
+  let raw=null;
+  try{
+    if(window.storage&&window.storage.get){
+      const r=await window.storage.get(KEY);
+      if(r&&r.value) raw=r.value;
+    }
+  }catch(e){}
+  if(raw==null){ try{ raw=localStorage.getItem(KEY); }catch(e){} }
+  if(!raw)return null;
+  try{ return normalize(JSON.parse(raw)); }catch(e){ return null; }
+}
+async function readPublic(){
+  try{
+    const res=await fetch('data.json?t='+Date.now(),{cache:'no-store'});
+    if(!res.ok)return null;
+    return normalize(await res.json());
+  }catch(e){ return null; }
+}
+async function loadData(){
+  const [loc,pub]=await Promise.all([readLocal(),readPublic()]);
+  pubStamp=pub?pub.stamp:null;
+  if(pub&&(!loc||pub.stamp>=loc.stamp)){
+    if(loc&&loc.stamp>0){ try{ localStorage.setItem(BACKUP_KEY,JSON.stringify(loc)); }catch(e){} }
+    D=pub; await save(true);
+  }else if(loc){
+    D=loc;
+  }
+  if(!D.members.length){
+    D.members=['PL1','PL2','PL3','PL4','PL5'].map(n=>({id:newId(),name:n}));
+  }
+  updateStatus();
+  renderAll();
+}
+async function save(keepStamp){
+  if(!keepStamp) D.stamp=Date.now();
+  const json=JSON.stringify(D);
+  try{ if(window.storage&&window.storage.set) await window.storage.set(KEY,json); }catch(e){}
+  try{ localStorage.setItem(KEY,json); }catch(e){}
+  updateStatus();
+}
+function as(){ clearTimeout(saveTm); saveTm=setTimeout(()=>save(),500); }
+
+function fmtStamp(ms){
+  if(!ms)return'―';
+  const d=new Date(ms),p=n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}/${p(d.getMonth()+1)}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function updateStatus(){
+  const el=document.getElementById('status'); if(!el)return;
+  const t=fmtStamp(D.stamp);
+  if(pubStamp==null){
+    el.innerHTML=`<span class="st st-local">このブラウザだけに保存中</span><span class="st-time">${t}</span>`;
+  }else if(D.stamp>pubStamp){
+    el.innerHTML=`<span class="st st-ahead">未公開の変更あり</span><span class="st-time">${t}</span>`;
+  }else{
+    el.innerHTML=`<span class="st st-pub">公開データを表示中</span><span class="st-time">${t}</span>`;
+  }
+}
+async function reloadPublic(){
+  const pub=await readPublic();
+  if(!pub){ alert('data.json が見つからない。GitHubにアップロード済みか、ファイル名が data.json になっているか確認して。'); return; }
+  if(!confirm('公開データを読み直す。このブラウザで加えた未公開の変更は消える。続ける？'))return;
+  const loc=await readLocal();
+  if(loc){ try{ localStorage.setItem(BACKUP_KEY,JSON.stringify(loc)); }catch(e){} }
+  D=pub; pubStamp=pub.stamp;
+  await save(true); renderAll(); toast('公開データを読み直した');
+}
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1600);
+}
+
+// ── Helper ──
+function newId(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,5); }
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function gp(id){ return D.plays.find(p=>p.id===id); }
+function gm(id){ return D.members.find(m=>m.id===id); }
+function scoreColor(v){ if(!v)return'var(--text-d)'; if(v>=8)return'#2ecc71'; if(v>=5)return'var(--gold)'; return'var(--red)'; }
+function allTags(){
+  const s=new Set(D.presets);
+  D.plays.forEach(p=>(p.tags||[]).forEach(t=>s.add(t)));
+  return [...s];
+}
+function partsOf(p){
+  const out=[];
+  D.members.forEach(m=>{ if(p.entries[m.id]) out.push({name:m.name,memberId:m.id,...p.entries[m.id]}); });
+  (p.guests||[]).forEach(g=>out.push({name:g.name||'ゲスト',memberId:null,...g}));
+  return out;
+}
+function culpritsOf(p){ return p.culpritNone?[]:partsOf(p).filter(x=>x.culprit); }
+
+// ── タブ ──
+function swTab(id,btn){
+  ['plays','stats','members','data'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display = t===id?'block':'none';
+  });
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(id==='stats') renderStats();
+  if(id==='members') renderMembers();
+}
+
+// ── プレイ記録 CRUD ──
+function addPlay(){
+  const p={id:newId(),title:'',date:new Date().toISOString().slice(0,10),
+    venue:'online',myRole:'PL',duration:'',
+    entries:{},guests:[],
+    culpritNone:false,culpritResult:'',
+    score:'',tags:[],note:''};
+  D.plays.push(p); openIds.add(p.id); save();
+  document.querySelectorAll('.tab')[0].click();
+  renderPlays();
+  setTimeout(()=>{ const el=document.getElementById('ti-'+p.id); if(el){el.focus();el.scrollIntoView({block:'center'});} },60);
+}
+function delPlay(id){
+  const p=gp(id);
+  if(!confirm(`「${p.title||'無題の記録'}」を削除する？`))return;
+  D.plays=D.plays.filter(x=>x.id!==id); save(); renderPlays(); toast('削除した');
+}
+function togPlay(id){
+  if(openIds.has(id)) openIds.delete(id); else openIds.add(id);
+  const b=document.getElementById('pb-'+id);
+  if(b) b.classList.toggle('open');
+}
+
+function savePlay(id){
+  const p=gp(id); if(!p)return;
+  const v=x=>{const e=document.getElementById(x+'-'+id);return e?e.value:'';};
+  p.title=v('ti'); p.date=v('dt'); p.venue=v('vn'); p.myRole=v('rl');
+  p.duration=v('du'); p.score=v('sc'); p.note=v('nt');
+  p.culpritResult=v('cr');
+  const cn=document.getElementById('cn-'+id); p.culpritNone=cn?cn.checked:false;
+  // メンバー
+  D.members.forEach(m=>{
+    const ck=document.getElementById(`mc-${id}-${m.id}`);
+    if(!ck)return;
+    if(ck.checked){
+      const old=p.entries[m.id]||{};
+      p.entries[m.id]={
+        charName:val(`ch-${id}-${m.id}`,old.charName),
+        culprit:chk(`cu-${id}-${m.id}`,old.culprit),
+        mission:val(`ms-${id}-${m.id}`,old.mission)
+      };
+    }else delete p.entries[m.id];
+  });
+  // ゲスト
+  (p.guests||[]).forEach(g=>{
+    g.name=val(`gn-${id}-${g.gid}`,g.name);
+    g.charName=val(`gc-${id}-${g.gid}`,g.charName);
+    g.culprit=chk(`gu-${id}-${g.gid}`,g.culprit);
+    g.mission=val(`gm-${id}-${g.gid}`,g.mission);
+  });
+  as();
+}
+function val(id,fb){ const e=document.getElementById(id); return e?e.value:(fb||''); }
+function chk(id,fb){ const e=document.getElementById(id); return e?e.checked:!!fb; }
+
+function togMember(pid,mid){ savePlay(pid); renderOnePlay(pid); }
+function togCulpritNone(pid){ savePlay(pid); renderOnePlay(pid); }
+function togCulprit(pid){ savePlay(pid); renderOnePlay(pid); }
+function addGuest(pid){
+  const p=gp(pid); savePlay(pid);
+  p.guests=p.guests||[];
+  p.guests.push({gid:newId(),name:'',charName:'',culprit:false,mission:''});
+  save(); renderOnePlay(pid);
+}
+function delGuest(pid,gid){
+  const p=gp(pid); savePlay(pid);
+  p.guests=p.guests.filter(g=>g.gid!==gid);
+  save(); renderOnePlay(pid);
+}
+function togTag(pid,tag){
+  const p=gp(pid); p.tags=p.tags||[];
+  const i=p.tags.indexOf(tag);
+  if(i>=0)p.tags.splice(i,1); else p.tags.push(tag);
+  save(); renderOnePlay(pid); refreshTagFilter();
+}
+function addPlayTag(pid){
+  const inp=document.getElementById('nt-tag-'+pid);
+  const t=inp.value.trim(); if(!t)return;
+  const p=gp(pid); p.tags=p.tags||[];
+  if(!p.tags.includes(t))p.tags.push(t);
+  if(!D.presets.includes(t))D.presets.push(t);
+  inp.value=''; save(); renderOnePlay(pid); refreshTagFilter();
+}
+
+// ── 描画：一覧 ──
+function filteredPlays(){
+  const q=(document.getElementById('qText').value||'').trim().toLowerCase();
+  const tag=document.getElementById('qTag').value;
+  const sort=document.getElementById('qSort').value;
+  let list=D.plays.filter(p=>{
+    if(tag&&!(p.tags||[]).includes(tag))return false;
+    if(!q)return true;
+    const hay=[p.title,p.note,...(p.tags||[]),...partsOf(p).map(x=>x.charName)].join(' ').toLowerCase();
+    return hay.includes(q);
+  });
+  const num=v=>{const n=parseFloat(v);return isNaN(n)?-1:n;};
+  list.sort((a,b)=>{
+    if(sort==='date-desc')return (b.date||'').localeCompare(a.date||'');
+    if(sort==='date-asc') return (a.date||'').localeCompare(b.date||'');
+    if(sort==='score-desc')return num(b.score)-num(a.score);
+    return num(a.score)-num(b.score);
+  });
+  return list;
+}
+function renderPlays(){
+  const el=document.getElementById('playList');
+  const list=filteredPlays();
+  if(!D.plays.length){
+    el.innerHTML='<div class="empty"><h2>MADAMIS LOG</h2><p class="info">「＋ 記録を追加」から1件目を作る</p></div>';
+    return;
+  }
+  if(!list.length){ el.innerHTML='<p class="info">条件に合う記録がない。検索語かタグを変えてみて。</p>'; return; }
+  el.innerHTML=list.map(p=>playCardHTML(p)).join('');
+}
+function renderOnePlay(id){
+  const p=gp(id); const old=document.getElementById('pc-'+id);
+  if(!old){ renderPlays(); return; }
+  const tmp=document.createElement('div');
+  tmp.innerHTML=playCardHTML(p);
+  old.replaceWith(tmp.firstElementChild);
+}
+function playCardHTML(p){
+  const parts=partsOf(p);
+  const culs=culpritsOf(p);
+  const day=p.date?` (${DAYS[new Date(p.date).getDay()]})`:'';
+  const open=openIds.has(p.id);
+  const resLbl={win:'犯人勝利',lose:'犯人敗北',draw:'引き分け'}[p.culpritResult]||'';
+  const tags=allTags();
+
+  const memRows=D.members.map(m=>{
+    const on=!!p.entries[m.id]; const e=p.entries[m.id]||{};
+    return `<div class="pt-row ${on?'':'off'} ${on&&e.culprit&&!p.culpritNone?'culprit':''}">
+      <input type="checkbox" id="mc-${p.id}-${m.id}" ${on?'checked':''} onchange="togMember('${p.id}','${m.id}')">
+      <span class="pt-name">${esc(m.name)}</span>
+      <input type="text" id="ch-${p.id}-${m.id}" value="${esc(e.charName)}" placeholder="キャラ名／HO" ${on?'':'disabled'} onchange="savePlay('${p.id}')">
+      <span class="pt-cul"><input type="checkbox" id="cu-${p.id}-${m.id}" ${e.culprit?'checked':''} ${on&&!p.culpritNone?'':'disabled'} onchange="togCulprit('${p.id}')"></span>
+      <input type="text" id="ms-${p.id}-${m.id}" value="${esc(e.mission)}" placeholder="使命達成度（例: 3/5、80点、主目標のみ達成）" ${on?'':'disabled'} onchange="savePlay('${p.id}')">
+    </div>`;
+  }).join('');
+
+  const guestRows=(p.guests||[]).map(g=>`
+    <div class="pt-row ${g.culprit&&!p.culpritNone?'culprit':''}">
+      <button class="btn btn-g btn-sm" style="color:var(--text-d);padding:0 4px" onclick="delGuest('${p.id}','${g.gid}')">✕</button>
+      <input type="text" id="gn-${p.id}-${g.gid}" value="${esc(g.name)}" placeholder="ゲスト名" onchange="savePlay('${p.id}')" style="padding:4px 7px;font-size:12px">
+      <input type="text" id="gc-${p.id}-${g.gid}" value="${esc(g.charName)}" placeholder="キャラ名／HO" onchange="savePlay('${p.id}')">
+      <span class="pt-cul"><input type="checkbox" id="gu-${p.id}-${g.gid}" ${g.culprit?'checked':''} ${p.culpritNone?'disabled':''} onchange="togCulprit('${p.id}')"></span>
+      <input type="text" id="gm-${p.id}-${g.gid}" value="${esc(g.mission)}" placeholder="使命達成度" onchange="savePlay('${p.id}')">
+    </div>`).join('');
+
+  return `
+  <div class="play-card" id="pc-${p.id}">
+    <div class="play-hdr" onclick="togPlay('${p.id}')">
+      <span class="play-date">${p.date||'日付なし'}${day}</span>
+      <span class="play-name">${esc(p.title)||'<span style="color:var(--text-d)">無題の記録</span>'}</span>
+      <span class="role-badge">${esc(p.myRole)}</span>
+      <span style="font-size:10px;color:var(--text-m);font-family:'JetBrains Mono',monospace">${parts.length}人</span>
+      ${culs.length?`<span style="font-size:10px;color:var(--red)">犯人 ${esc(culs.map(c=>c.name).join('／'))}</span>`:(p.culpritNone?'<span style="font-size:10px;color:var(--text-d)">犯人不在</span>':'')}
+      <span class="play-score" style="color:${scoreColor(parseFloat(p.score))}">${p.score||'―'}</span>
+      <button class="btn btn-g btn-sm" onclick="event.stopPropagation();delPlay('${p.id}')" style="color:var(--text-d);padding:2px 6px">✕</button>
+    </div>
+    <div class="play-body ${open?'open':''}" id="pb-${p.id}">
+      <div class="fg">
+        <div class="fgrp s2"><label class="flabel">シナリオ名</label>
+          <input id="ti-${p.id}" value="${esc(p.title)}" placeholder="シナリオ名" onchange="savePlay('${p.id}')" oninput="savePlay('${p.id}')"></div>
+        <div class="fgrp"><label class="flabel">プレイ日</label>
+          <input type="date" id="dt-${p.id}" value="${p.date||''}" onchange="savePlay('${p.id}')"></div>
+        <div class="fgrp"><label class="flabel">所要時間</label>
+          <input id="du-${p.id}" value="${esc(p.duration)}" placeholder="例: 4h30m" onchange="savePlay('${p.id}')"></div>
+        <div class="fgrp"><label class="flabel">形式</label>
+          <select id="vn-${p.id}" onchange="savePlay('${p.id}')">
+            <option value="online" ${p.venue==='online'?'selected':''}>オンライン</option>
+            <option value="offline" ${p.venue==='offline'?'selected':''}>オフライン</option>
+          </select></div>
+        <div class="fgrp"><label class="flabel">自分の立場</label>
+          <select id="rl-${p.id}" onchange="savePlay('${p.id}')">
+            ${['PL','GM','GMレス'].map(r=>`<option ${p.myRole===r?'selected':''}>${r}</option>`).join('')}
+          </select></div>
+      </div>
+
+      <hr class="div">
+      <div class="sec-title">参加者と使命達成度</div>
+      <div class="pt-head"><span></span><span>メンバー</span><span>キャラ名／HO</span><span style="text-align:center">犯人</span><span>使命達成度</span></div>
+      ${memRows}${guestRows}
+      <div class="row mt8">
+        <button class="btn btn-s btn-sm" onclick="addGuest('${p.id}')">＋ ゲストを追加</button>
+        <label class="row" style="gap:6px;margin-left:8px;cursor:pointer">
+          <input type="checkbox" id="cn-${p.id}" ${p.culpritNone?'checked':''} onchange="togCulpritNone('${p.id}')">
+          <span style="font-size:12px;color:var(--text-m)">犯人不在シナリオ</span>
+        </label>
+        <div class="fgrp" style="margin-left:auto">
+          <label class="flabel">犯人サイドの結果</label>
+          <select id="cr-${p.id}" onchange="savePlay('${p.id}')" ${p.culpritNone?'disabled':''}>
+            <option value="" ${!p.culpritResult?'selected':''}>未記録</option>
+            <option value="win" ${p.culpritResult==='win'?'selected':''}>犯人の勝ち</option>
+            <option value="lose" ${p.culpritResult==='lose'?'selected':''}>犯人の負け</option>
+            <option value="draw" ${p.culpritResult==='draw'?'selected':''}>引き分け</option>
+          </select>
+        </div>
+      </div>
+
+      <hr class="div">
+      <div class="fg">
+        <div class="fgrp"><label class="flabel">シナリオ評価（1〜10）</label>
+          <input type="number" id="sc-${p.id}" min="1" max="10" step="0.5" value="${p.score||''}" style="width:80px" onchange="savePlay('${p.id}')"></div>
+        <div class="fgrp"><label class="flabel">この卓のタグ</label>
+          <div class="row">
+            <input id="nt-tag-${p.id}" placeholder="新しいタグ" style="width:140px" onkeydown="if(event.key==='Enter')addPlayTag('${p.id}')">
+            <button class="btn btn-s btn-sm" onclick="addPlayTag('${p.id}')">追加</button>
+          </div></div>
+        <div class="fgrp s2">
+          <div class="tag-wrap">${tags.map(t=>`<span class="tag ${(p.tags||[]).includes(t)?'on':''}" onclick="togTag('${p.id}','${esc(t).replace(/'/g,"\\'")}')">${esc(t)}</span>`).join('')}</div>
+        </div>
+        <div class="fgrp s2"><label class="flabel">雑感（ネタバレ可・カードを閉じれば隠れる）</label>
+          <textarea id="nt-${p.id}" placeholder="印象に残った点、うまくいった／いかなかった推理、次に同卓するときの注意など" onchange="savePlay('${p.id}')">${esc(p.note)}</textarea></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function refreshTagFilter(){
+  const s=document.getElementById('qTag'); const cur=s.value;
+  s.innerHTML='<option value="">タグ全部</option>'+allTags().map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
+  s.value=cur;
+}
+
+// ── 集計 ──
+function renderStats(){
+  const el=document.getElementById('tab-stats');
+  if(!D.plays.length){ el.innerHTML='<p class="info">記録がまだない。1件入れると集計が出る。</p>'; return; }
+  const plays=D.plays;
+  const scores=plays.map(p=>parseFloat(p.score)).filter(v=>!isNaN(v));
+  const avgScore=scores.length?(scores.reduce((a,b)=>a+b)/scores.length).toFixed(1):'―';
+  const withCul=plays.filter(p=>!p.culpritNone&&p.culpritResult);
+  const win=withCul.filter(p=>p.culpritResult==='win').length;
+  const winRate=withCul.length?Math.round(win/withCul.length*100):null;
+  const gmCnt=plays.filter(p=>p.myRole==='GM').length;
+
+  // メンバー別
+  const rows=D.members.map(m=>{
+    const joined=plays.filter(p=>p.entries[m.id]);
+    const cul=joined.filter(p=>!p.culpritNone&&p.entries[m.id].culprit);
+    const culWin=cul.filter(p=>p.culpritResult==='win').length;
+    const culable=joined.filter(p=>!p.culpritNone).length;
+    return {name:m.name,joined:joined.length,cul:cul.length,culable,culWin,
+      rate:culable?cul.length/culable:0};
+  }).filter(r=>r.joined>0);
+  const maxRate=Math.max(0.01,...rows.map(r=>r.rate));
+
+  // タグ別
+  const tagMap={};
+  plays.forEach(p=>(p.tags||[]).forEach(t=>{
+    if(!tagMap[t])tagMap[t]={n:0,sc:[]};
+    tagMap[t].n++;
+    const s=parseFloat(p.score); if(!isNaN(s))tagMap[t].sc.push(s);
+  }));
+  const tagRows=Object.entries(tagMap).sort((a,b)=>b[1].n-a[1].n);
+
+  const top=plays.filter(p=>!isNaN(parseFloat(p.score)))
+    .sort((a,b)=>parseFloat(b.score)-parseFloat(a.score)).slice(0,5);
+
+  el.innerHTML=`
+  <div class="sec">
+    <div class="sec-title">全体</div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-lbl">プレイ数</div><div class="stat-val">${plays.length}</div><div class="stat-sub">卓</div></div>
+      <div class="stat-card"><div class="stat-lbl">シナリオ評価 平均</div><div class="stat-val" style="color:${scoreColor(parseFloat(avgScore))}">${avgScore}</div><div class="stat-sub">/ 10</div></div>
+      <div class="stat-card"><div class="stat-lbl">犯人サイド勝率</div><div class="stat-val">${winRate==null?'―':winRate+'%'}</div><div class="stat-sub">${win} / ${withCul.length} 卓</div></div>
+      <div class="stat-card"><div class="stat-lbl">GM担当</div><div class="stat-val">${gmCnt}</div><div class="stat-sub">卓</div></div>
+      <div class="stat-card"><div class="stat-lbl">犯人不在シナリオ</div><div class="stat-val">${plays.filter(p=>p.culpritNone).length}</div><div class="stat-sub">卓</div></div>
+    </div>
+  </div>
+  <hr class="div">
+  <div class="sec">
+    <div class="sec-title">メンバー別</div>
+    ${rows.length?`<table class="tbl">
+      <tr><th>メンバー</th><th>参加</th><th>犯人</th><th>犯人率</th><th style="width:110px"></th><th>犯人時の勝ち</th></tr>
+      ${rows.map(r=>`<tr>
+        <td>${esc(r.name)}</td>
+        <td class="num">${r.joined}</td>
+        <td class="num">${r.cul}</td>
+        <td class="num">${r.culable?Math.round(r.rate*100)+'%':'―'}</td>
+        <td><div class="bar-track"><div class="bar-fill" style="width:${Math.round(r.rate/maxRate*100)}%"></div></div></td>
+        <td class="num">${r.cul?`${r.culWin} / ${r.cul}`:'―'}</td>
+      </tr>`).join('')}
+    </table><p class="info mt8">犯人率は「犯人が存在した卓のうち、その人が犯人だった割合」。均等なら 1/人数 前後になる。</p>`:'<p class="info">参加記録がまだない。</p>'}
+  </div>
+  <hr class="div">
+  <div class="sec">
+    <div class="sec-title">タグ別</div>
+    ${tagRows.length?`<table class="tbl">
+      <tr><th>タグ</th><th>卓数</th><th>評価平均</th></tr>
+      ${tagRows.map(([t,v])=>`<tr><td>${esc(t)}</td><td class="num">${v.n}</td>
+        <td class="num">${v.sc.length?(v.sc.reduce((a,b)=>a+b)/v.sc.length).toFixed(1):'―'}</td></tr>`).join('')}
+    </table>`:'<p class="info">タグがまだ付いていない。</p>'}
+  </div>
+  <hr class="div">
+  <div class="sec">
+    <div class="sec-title">評価が高かった卓</div>
+    ${top.length?`<table class="tbl">
+      <tr><th>シナリオ</th><th>日付</th><th>評価</th><th>タグ</th></tr>
+      ${top.map(p=>`<tr><td>${esc(p.title)||'無題'}</td><td class="num">${p.date||''}</td>
+        <td class="num" style="color:${scoreColor(parseFloat(p.score))}">${p.score}</td>
+        <td>${(p.tags||[]).map(t=>`<span class="tag-static">${esc(t)}</span>`).join(' ')}</td></tr>`).join('')}
+    </table>`:'<p class="info">評価の入った記録がまだない。</p>'}
+  </div>`;
+}
+
+// ── メンバー ──
+function renderMembers(){
+  const el=document.getElementById('memList');
+  el.innerHTML=D.members.map((m,i)=>`
+    <div class="mem-row">
+      <span class="mem-idx">${i+1}</span>
+      <input value="${esc(m.name)}" style="flex:1" onchange="renameMember('${m.id}',this.value)">
+      <button class="btn btn-g btn-sm" style="color:var(--text-d)" onclick="delMember('${m.id}')">✕</button>
+    </div>`).join('')||'<p class="info">メンバーがいない。</p>';
+  const pl=document.getElementById('presetList');
+  pl.innerHTML=D.presets.map(t=>`<span class="tag">${esc(t)} <span style="color:var(--text-d)" onclick="delPreset('${esc(t).replace(/'/g,"\\'")}')">✕</span></span>`).join('');
+}
+function addMember(){ D.members.push({id:newId(),name:''}); save(); renderMembers(); renderPlays(); }
+function renameMember(id,v){ const m=gm(id); if(m){m.name=v; save(); renderPlays();} }
+function delMember(id){
+  const m=gm(id);
+  const used=D.plays.filter(p=>p.entries[id]).length;
+  if(used&&!confirm(`${m.name||'このメンバー'}は${used}件の記録で使われている。削除するとその参加記録も消える。続ける？`))return;
+  D.members=D.members.filter(x=>x.id!==id);
+  D.plays.forEach(p=>delete p.entries[id]);
+  save(); renderMembers(); renderPlays();
+}
+function addPreset(){
+  const inp=document.getElementById('newPreset');
+  const t=inp.value.trim(); if(!t)return;
+  if(!D.presets.includes(t))D.presets.push(t);
+  inp.value=''; save(); renderMembers(); refreshTagFilter(); renderPlays();
+}
+function delPreset(t){
+  D.presets=D.presets.filter(x=>x!==t);
+  save(); renderMembers(); refreshTagFilter();
+}
+
+// ── 入出力 ──
+function q(v){ return `"${String(v==null?'':v).replace(/"/g,'""')}"`; }
+function exportCSV(){
+  const hdr=['日付','曜日','シナリオ名','形式','自分の立場','所要時間','人数',
+    '犯人','犯人サイド結果','評価','タグ','参加者とキャラ・使命達成度','雑感'];
+  const rows=D.plays.slice().sort((a,b)=>(a.date||'').localeCompare(b.date||'')).map(p=>{
+    const parts=partsOf(p);
+    const culs=culpritsOf(p);
+    const detail=parts.map(x=>`${x.name}:${x.charName||'―'}/${x.mission||'―'}`).join(' | ');
+    const res={win:'犯人勝利',lose:'犯人敗北',draw:'引き分け'}[p.culpritResult]||'';
+    return [p.date,p.date?DAYS[new Date(p.date).getDay()]:'',p.title,
+      p.venue==='offline'?'オフライン':'オンライン',p.myRole,p.duration,parts.length,
+      p.culpritNone?'犯人不在':culs.map(c=>c.name).join('／'),res,
+      p.score,(p.tags||[]).join('／'),detail,p.note].map(q).join(',');
+  });
+  dl('\uFEFF'+[hdr.map(q).join(','),...rows].join('\n'),'マダミス記録.csv','text/csv;charset=utf-8;');
+  toast('CSVを書き出した');
+}
+function exportPublic(){
+  if(!D.stamp) D.stamp=Date.now();
+  dl(JSON.stringify(D,null,2),'data.json','application/json');
+  toast('data.json を書き出した。サイトのフォルダに上書きアップロードして');
+}
+function exportJSON(){
+  dl(JSON.stringify(D,null,2),`madamis_log_${new Date().toISOString().slice(0,10)}.json`,'application/json');
+  toast('JSONを書き出した');
+}
+function importJSON(){
+  const f=document.getElementById('importFile').files[0];
+  if(!f){ toast('ファイルを選んで'); return; }
+  const r=new FileReader();
+  r.onload=e=>{
+    try{
+      const p=JSON.parse(e.target.result);
+      if(!p.plays||!p.members)throw new Error('形式が違う');
+      if(!confirm('現在のデータを上書きする。続ける？'))return;
+      D={members:p.members,plays:p.plays,presets:p.presets||DEFAULT_PRESETS.slice()};
+      save(); renderAll(); toast('読み込み完了');
+    }catch(err){ alert('読み込めなかった: '+err.message); }
+  };
+  r.readAsText(f,'utf-8');
+}
+function dl(content,filename,type){
+  const blob=new Blob([content],{type});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ── 初期化 ──
+function renderAll(){ refreshTagFilter(); renderPlays(); renderMembers(); }
+loadData();
+</script>
+</body>
+</html>
